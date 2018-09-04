@@ -2,13 +2,13 @@ const rawTransaction = require('./helpers/rawTransaction').rawTransaction;
 const wait = require('./helpers/wait').wait;
 const privateKeys = require('./helpers/truffle-keys').private;
 const publicKeys = require('./helpers/truffle-keys').public;
-const Token = artifacts.require('./Token.sol');
+const TokenWithCrowdsale = artifacts.require('./TokenWithCrowdsale.sol');
 
-contract('Token', function(accounts) {
+contract('TokenWithCrowdsale', function(accounts) {
   let contract, owner, web3Contract, eventCounter = {};
 
   before(async () => {
-    contract = await Token.deployed();
+    contract = await TokenWithCrowdsale.deployed();
     web3Contract = web3.eth.contract(contract.abi).at(contract.address);
     owner = web3Contract._eth.coinbase;
     const other = publicKeys[1];

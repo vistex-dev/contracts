@@ -1,5 +1,5 @@
-const Token = artifacts.require('Token');
+const TokenWithCrowdsale = artifacts.require('TokenWithCrowdsale');
 
 module.exports = (deployer) => {
-  deployer.deploy(Token);
+  deployer.deploy(TokenWithCrowdsale);
 };

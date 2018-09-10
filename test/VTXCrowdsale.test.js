@@ -30,7 +30,7 @@ contract("Generic Whitelisted Crowdsale", async function([
     const totalSupplyWholeDigits = new BigNumber(21000000)
 
     this.totalSupply = totalSupplyWholeDigits.mul(new BigNumber(10).pow(decimals))
-    this.token = await Token.new("GenericWhitelistedToken", "GENWLTOK", decimals, totalSupplyWholeDigits)
+    this.token = await Token.new("VTXWhitelistedToken", "VTX", decimals, totalSupplyWholeDigits)
     this.crowdsale = await Crowdsale.new(rate, creator, this.token.address)
     await this.token.transfer(this.crowdsale.address, this.totalSupply)
   })
@@ -69,7 +69,17 @@ contract("Generic Whitelisted Crowdsale", async function([
       const isWhitelisted = await this.crowdsale.whitelist(addressToWhitelist)
       isWhitelisted.should.be.true
     })
-  })
+
+    it("should allow purchases for whitelisted address", async function() {
+      const addressToWhitelist = purchaser
+      this.crowdsale.addAddressToWhitelist(addressToWhitelist).should.be.fulfilled
+      const value = web3.toWei(new BigNumber(1), "ether")
+      this.crowdsale.sendTransaction({ from: purchaser, value }).should.be.fulfilled
+      const whitelistedBalance = await this.token.balanceOf(purchaser)
+      await advanceBlock(web3)
+      expect(whitelistedBalance.eq(value)).to.be.true
+    })
+ })
 
   describe("integration tests", async function() {
     it("should survive a series of calls", async function() {

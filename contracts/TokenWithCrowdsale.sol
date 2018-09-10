@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
  * Token
@@ -9,7 +9,7 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
  * @title A fixed supply ERC-20 token contract with crowdsale capability.
  * https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
  */
-contract Token is Ownable {
+contract TokenWithCrowdsale is Ownable {
     using SafeMath for uint;
     uint public constant MAX_UINT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 

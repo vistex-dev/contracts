@@ -1,26 +1,22 @@
-
-
-const EVMRevert = require("./helpers/EVMRevert")
-const chaiAsPromised = require("chai-as-promised")
-const { assertRevert } = require('./helpers/assertRevert');
-const { advanceBlock } = require("./helpers/advanceToBlock")
-const { expectThrow } = require('./helpers/expectThrow');
 const { ether } = require('./helpers/ether');
+const { advanceBlock } = require('./helpers/advanceToBlock');
 const { increaseTimeTo, duration } = require('./helpers/increaseTime');
 const { latestTime } = require('./helpers/latestTime');
+const { expectThrow } = require('./helpers/expectThrow');
+const { EVMRevert } = require('./helpers/EVMRevert');
+const { assertRevert } = require('./helpers/assertRevert');
 const { ethGetBalance } = require('./helpers/web3');
+
 const BigNumber = web3.BigNumber;
 
-require("chai")
+require('chai')
   .use(require('chai-bignumber')(BigNumber))
-  .use(chaiAsPromised)
-  .should()
+  .should();
 
-const Crowdsale = artifacts.require("VTXCrowdsale")
-const Token = artifacts.require("VTXToken")
+const SampleCrowdsale = artifacts.require('SampleCrowdsale');
+const SampleCrowdsaleToken = artifacts.require('SampleCrowdsaleToken');
 
-
-contract('VTXCrowdsale', function ([_, deployer, owner, wallet, investor]) {
+contract('SampleCrowdsale', function ([owner, wallet, investor]) {
   const RATE = new BigNumber(10);
   const GOAL = ether(10);
   const CAP = ether(20);
@@ -35,27 +31,30 @@ contract('VTXCrowdsale', function ([_, deployer, owner, wallet, investor]) {
     this.closingTime = this.openingTime + duration.weeks(1);
     this.afterClosingTime = this.closingTime + duration.seconds(1);
 
-    this.token = await Token.new({ from: deployer });
-    this.crowdsale = await Crowdsale.new(
-      this.openingTime, this.closingTime, RATE, wallet, CAP, this.token.address, GOAL,
-      { from: owner }
+    this.token = await SampleCrowdsaleToken.new({ from: owner });
+    this.crowdsale = await SampleCrowdsale.new(
+      this.openingTime, this.closingTime, RATE, wallet, CAP, this.token.address, GOAL
     );
-
     await this.token.transferOwnership(this.crowdsale.address);
-    //await this.token.addMinter(this.crowdsale.address, { from: deployer });
-    //await this.token.renounceMinter({ from: deployer });
   });
 
   it('should create crowdsale with correct parameters', async function () {
     this.crowdsale.should.exist;
-    this.token.should.exit;
+    this.token.should.exist;
 
-    (await this.crowdsale.openingTime()).should.be.bignumber.equal(this.openingTime);
-    (await this.crowdsale.closingTime()).should.be.bignumber.equal(this.closingTime);
-    (await this.crowdsale.rate()).should.be.bignumber.equal(RATE);
-    (await this.crowdsale.wallet()).should.be.equal(wallet);
-    (await this.crowdsale.goal()).should.be.bignumber.equal(GOAL);
-    (await this.crowdsale.cap()).should.be.bignumber.equal(CAP);
+    const openingTime = await this.crowdsale.openingTime();
+    const closingTime = await this.crowdsale.closingTime();
+    const rate = await this.crowdsale.rate();
+    const walletAddress = await this.crowdsale.wallet();
+    const goal = await this.crowdsale.goal();
+    const cap = await this.crowdsale.cap();
+
+    openingTime.should.be.bignumber.equal(this.openingTime);
+    closingTime.should.be.bignumber.equal(this.closingTime);
+    rate.should.be.bignumber.equal(RATE);
+    walletAddress.should.be.equal(wallet);
+    goal.should.be.bignumber.equal(GOAL);
+    cap.should.be.bignumber.equal(CAP);
   });
 
   it('should not accept payments before start', async function () {
@@ -112,7 +111,7 @@ contract('VTXCrowdsale', function ([_, deployer, owner, wallet, investor]) {
     await increaseTimeTo(this.afterClosingTime);
 
     await this.crowdsale.finalize({ from: owner });
-    await this.crowdsale.claimRefund(investor, { gasPrice: 0 });
+    await this.crowdsale.claimRefund({ from: investor, gasPrice: 0 });
 
     const balanceAfterRefund = await ethGetBalance(investor);
     balanceBeforeInvestment.should.be.bignumber.equal(balanceAfterRefund);
@@ -123,42 +122,9 @@ contract('VTXCrowdsale', function ([_, deployer, owner, wallet, investor]) {
     const HIGH_GOAL = ether(30);
 
     it('creation reverts', async function () {
-      await assertRevert(Crowdsale.new(
+      await assertRevert(SampleCrowdsale.new(
         this.openingTime, this.closingTime, RATE, wallet, CAP, this.token.address, HIGH_GOAL
       ));
     });
   });
-
-
-  describe("check defaults", async function() {
-    it("no addresses should be whitelisted by default", async function() {
-      const isAddressWhitelisted = await this.crowdsale.whitelist(deployer)
-      isAddressWhitelisted.should.be.false
-    })
-  })
-
-  describe("whitelisted crowdsale behaviours", async function() {
-    it("should reject purchases for non-whitelisted address", async function() {
-      const value = web3.toWei(new BigNumber(1), "ether")
-      this.crowdsale.sendTransaction({ from: investor, value }).should.be.rejectedWith(EVMRevert)
-    })
-
-    it("should whitelist an address", async function() {
-      const addressToWhitelist = investor
-      this.crowdsale.addAddressToWhitelist(addressToWhitelist).should.be.fulfilled
-      const isWhitelisted = await this.crowdsale.whitelist(addressToWhitelist)
-      isWhitelisted.should.be.true
-    })
-
-    it("should allow purchases for whitelisted address", async function() {
-      const addressToWhitelist = investor
-      this.crowdsale.addAddressToWhitelist(addressToWhitelist).should.be.fulfilled
-      const value = web3.toWei(new BigNumber(1), "ether")
-      this.crowdsale.sendTransaction({ from: purchaser, value }).should.be.fulfilled
-      const whitelistedBalance = await this.token.balanceOf(purchaser)
-      await advanceBlock(web3)
-      expect(whitelistedBalance.eq(value)).to.be.true
-    })
- })
-
 });

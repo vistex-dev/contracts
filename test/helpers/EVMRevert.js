@@ -1,3 +1,1 @@
-module.exports = {
-  EVMRevert: 'revert'
-};
+export default 'revert';

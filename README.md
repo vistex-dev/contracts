@@ -18,5 +18,3 @@ Run tests
 ```
 $ npm test
 ```
-
-***Do not use the truffle supplied accounts or private keys on the main ethereum network***

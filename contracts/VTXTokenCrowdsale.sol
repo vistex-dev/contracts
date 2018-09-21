@@ -13,13 +13,15 @@ import "openzeppelin-solidity/contracts/crowdsale/distribution/RefundableCrowdsa
 
 contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, TimedCrowdsale, WhitelistedCrowdsale, RefundableCrowdsale {
 
-  // Track investor contributions
+    // Track investor contributions
     uint256 public investorMinCap = 2000000000000000; // 0.002 ether
     uint256 public investorHardCap = 50000000000000000000; // 50 ether
     mapping(address => uint256) public contributions;
 
     // Crowdsale Stages
     enum CrowdsaleStage { PreICO, ICO }
+    mapping (uint => uint256) stageRate;
+    uint16 numberOfStages = 2;
     // Default to presale stage
     CrowdsaleStage public stage = CrowdsaleStage.PreICO;
 
@@ -41,7 +43,8 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
     address public partnersTimelock;
 
     constructor(
-      uint256 _rate,
+      uint256 _preIcoRate,
+      uint256 _IcoRate,
       address _wallet,
       ERC20 _token,
       uint256 _cap,
@@ -53,7 +56,7 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
       address _partnersFund,
       uint256 _releaseTime
     )
-      Crowdsale(_rate, _wallet, _token)
+      Crowdsale(_preIcoRate, _wallet, _token)
       CappedCrowdsale(_cap)
       TimedCrowdsale(_openingTime, _closingTime)
       RefundableCrowdsale(_goal)
@@ -64,6 +67,26 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
         foundationFund = _foundationFund;
         partnersFund = _partnersFund;
         releaseTime = _releaseTime;
+        setStageRate(CrowdsaleStage.PreICO, _preIcoRate);
+        setStageRate(CrowdsaleStage.ICO, _IcoRate);
+    }
+
+    /**
+    * @dev Returns the rate for a given stage
+    * @param _stage CrowdsaleStage that we want the rate for
+    * @return rate for the given stage
+    */
+    function getStageRate(CrowdsaleStage _stage) private view returns (uint256) {
+        return stageRate[uint(_stage)];
+    }
+
+    /**
+    * @dev Sets the rate for a given stage
+    * @param _stage CrowdsaleStage that we want to set the rate for
+    * @param _rate uint256 rate that we want to set for the given stage
+    */
+    function setStageRate(CrowdsaleStage _stage, uint256 _rate) private {
+        stageRate[uint(_stage)] = _rate;
     }
 
     /**
@@ -82,17 +105,9 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
     * @param _stage Crowdsale stage
     */
     function setCrowdsaleStage(uint _stage) public onlyOwner {
-        if(uint(CrowdsaleStage.PreICO) == _stage) {
-            stage = CrowdsaleStage.PreICO;
-        } else if (uint(CrowdsaleStage.ICO) == _stage) {
-            stage = CrowdsaleStage.ICO;
-        }
-
-        if(stage == CrowdsaleStage.PreICO) {
-            rate = 500;
-        } else if (stage == CrowdsaleStage.ICO) {
-            rate = 250;
-        }
+        require(uint(_stage) <= numberOfStages);
+        stage = CrowdsaleStage(_stage);
+        rate = getStageRate(stage);
     }
 
     /**

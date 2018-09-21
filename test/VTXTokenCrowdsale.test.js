@@ -36,7 +36,6 @@ contract('VTXTokenCrowdsale', function([_, wallet, investor1, investor2, founder
     );
 
     // Crowdsale config
-    this.rate = 500;
     this.wallet = wallet;
     this.cap = ether(100);
     this.openingTime = latestTime() + duration.weeks(1);
@@ -64,7 +63,8 @@ contract('VTXTokenCrowdsale', function([_, wallet, investor1, investor2, founder
     this.partnersPercentage = 10;
 
     this.crowdsale = await VTXTokenCrowdsale.new(
-      this.rate,
+      this.preIcoRate,
+      this.icoRate,
       this.wallet,
       this.token.address,
       this.cap,
@@ -97,7 +97,7 @@ contract('VTXTokenCrowdsale', function([_, wallet, investor1, investor2, founder
   describe('Crowdsale', function() {
     it('tracks the rate', async function() {
       const rate = await this.crowdsale.rate();
-      rate.should.be.bignumber.equal(this.rate);
+      rate.should.be.bignumber.equal(this.preIcoRate);
     });
 
     it('tracks the wallet', async function() {

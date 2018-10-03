@@ -26,21 +26,15 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
     CrowdsaleStage public stage = CrowdsaleStage.PreICO;
 
     // Token Distribution
-    uint256 public tokenSalePercentage = 70;
-    uint256 public foundersPercentage = 10;
-    uint256 public foundationPercentage = 10;
-    uint256 public partnersPercentage = 10;
+    uint256 public tokenSalePercentage = 80;
+    uint256 public foundersPercentage = 20;
 
     // Token reserve funds
     address public foundersFund;
-    address public foundationFund;
-    address public partnersFund;
 
     // Token time lock
     uint256 public releaseTime;
     address public foundersTimelock;
-    address public foundationTimelock;
-    address public partnersTimelock;
 
     constructor(
       uint256 _preIcoRate,
@@ -52,8 +46,6 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
       uint256 _closingTime,
       uint256 _goal,
       address _foundersFund,
-      address _foundationFund,
-      address _partnersFund,
       uint256 _releaseTime
     )
       Crowdsale(_preIcoRate, _wallet, _token)
@@ -64,8 +56,6 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
     {
         require(_goal <= _cap);
         foundersFund = _foundersFund;
-        foundationFund = _foundationFund;
-        partnersFund = _partnersFund;
         releaseTime = _releaseTime;
         setStageRate(CrowdsaleStage.PreICO, _preIcoRate);
         setStageRate(CrowdsaleStage.ICO, _IcoRate);
@@ -150,12 +140,8 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
             uint256 _finalTotalSupply = _alreadyMinted.div(tokenSalePercentage).mul(100);
 
             foundersTimelock = new TokenTimelock(token, foundersFund, releaseTime);
-            foundationTimelock = new TokenTimelock(token, foundationFund, releaseTime);
-            partnersTimelock = new TokenTimelock(token, partnersFund, releaseTime);
 
-            _mintableToken.mint(foundersTimelock, _finalTotalSupply.div(foundersPercentage));
-            _mintableToken.mint(foundationTimelock, _finalTotalSupply.div(foundationPercentage));
-            _mintableToken.mint(partnersTimelock, _finalTotalSupply.div(partnersPercentage));
+            _mintableToken.mint(foundersTimelock, _finalTotalSupply.div(100 / foundersPercentage));
             _mintableToken.finishMinting();
 
             // Unpause the token

@@ -68,6 +68,7 @@ contract('VTXTokenCrowdsale', function([_, wallet, investor1, investor2, founder
       this.closingTime,
       this.goal,
       this.foundersFund,
+      this.foundersPercentage,
       this.releaseTime
     );
 

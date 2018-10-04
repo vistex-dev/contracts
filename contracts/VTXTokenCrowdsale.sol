@@ -21,13 +21,13 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
     // Crowdsale Stages
     enum CrowdsaleStage { PreICO, ICO }
     mapping (uint => uint256) stageRate;
-    uint16 numberOfStages = 2;
+    uint8 numberOfStages = 2;
     // Default to presale stage
     CrowdsaleStage public stage = CrowdsaleStage.PreICO;
 
     // Token Distribution
-    uint256 public tokenSalePercentage = 80;
-    uint256 public foundersPercentage = 20;
+    uint8 public tokenSalePercentage = 80;
+    uint8 public foundersPercentage = 20;
 
     // Token reserve funds
     address public foundersFund;
@@ -46,6 +46,7 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
       uint256 _closingTime,
       uint256 _goal,
       address _foundersFund,
+      uint8 _foundersPercentage,
       uint256 _releaseTime
     )
       Crowdsale(_preIcoRate, _wallet, _token)
@@ -56,6 +57,8 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
     {
         require(_goal <= _cap);
         foundersFund = _foundersFund;
+        foundersPercentage = _foundersPercentage;
+        tokenSalePercentage = 100 - foundersPercentage;
         releaseTime = _releaseTime;
         setStageRate(CrowdsaleStage.PreICO, _preIcoRate);
         setStageRate(CrowdsaleStage.ICO, _IcoRate);

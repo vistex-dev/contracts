@@ -22,16 +22,18 @@ module.exports = async function(deployer, network, accounts) {
 
   const latestTime = (new Date).getTime();
 
-  const _rate           = 500;
-  const _wallet         = accounts[0]; // TODO: Replace me
-  const _token          = deployedToken.address;
-  const _openingTime    = latestTime + duration.minutes(1);
-  const _closingTime    = _openingTime + duration.weeks(1);
-  const _cap            = ether(100);
-  const _goal           = ether(50);
-  const _foundersFund   = accounts[0]; // TODO: Replace me
+  const _rate = 500;
+  const _wallet = accounts[0]; // TODO: Replace me
+  const _token = deployedToken.address;
+  const _openingTime = latestTime + duration.minutes(1);
+  const _closingTime = _openingTime + duration.weeks(1);
+  const _cap = ether(100);
+  const _goal = ether(50);
+  const _investorMinCap = ether(0.002);
+  const _investorHardCap = ether(50);
+  const _foundersFund = accounts[0]; // TODO: Replace me
   const _foundersPercentage = 20;
-  const _releaseTime    = _closingTime + duration.days(1);
+  const _releaseTime = _closingTime + duration.days(1);
 
   await deployer.deploy(
     VTXTokenCrowdsale,
@@ -42,6 +44,7 @@ module.exports = async function(deployer, network, accounts) {
     _openingTime,
     _closingTime,
     _goal,
+    _investorMinCap,
     _foundersFund,
     _foundersPercentage,
     _releaseTime

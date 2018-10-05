@@ -45,6 +45,7 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
       uint256 _openingTime,
       uint256 _closingTime,
       uint256 _goal,
+      uint256 _investorMinCap,
       address _foundersFund,
       uint8 _foundersPercentage,
       uint256 _releaseTime
@@ -56,6 +57,7 @@ contract VTXTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, Timed
       public
     {
         require(_goal <= _cap);
+        investorMinCap = _investorMinCap;
         foundersFund = _foundersFund;
         foundersPercentage = _foundersPercentage;
         tokenSalePercentage = 100 - foundersPercentage;
